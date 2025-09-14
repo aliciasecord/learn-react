@@ -1,90 +1,41 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Index() {
-  const [count, setCount] = useState(0); // start at 0
-    const [showBorder, setShowBorder] = useState(false);
+import CounterScreen from "./screens/CounterScreen.tsx";  // your counter app
+import ToDoScreen from "./screens/ToDoScreen.tsx";        // your to-do app
 
-  useEffect(() => {
-    const loadCount = async () => {
-      try {
-        const savedCount = await AsyncStorage.getItem('counter');
-        if (savedCount !== null) {
-          setCount(parseInt(savedCount));
-        }
-      } catch (e) {
-        console.log("Failed to load count:", e);
-      }
-    };
-    loadCount();
-  }, []);
-  const updateCount = async (newCount: number) => {
-    setCount(newCount);
-    try {
-      await AsyncStorage.setItem('counter', newCount.toString());
-    } catch (e) {
-      console.log("Failed to save count:", e);
-    }
-  };
+const Tab = createBottomTabNavigator();
+
+export default function App() {
   return (
-    <View style={[styles.container, showBorder ? styles.borderOn : null]}>
-      <Text style={styles.text}>Count: {count}</Text>
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => setCount(count + 1)}>
-        <Text style={styles.buttonText}>+</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => setCount(count - 1)}>
-        <Text style={styles.buttonText}>-</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, { marginTop: 20}]}
-        onPress={() => updateCount(1000)}
-      >
-        <Text style={styles.buttonText}>Reset</Text>
-      </TouchableOpacity>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setShowBorder(!showBorder)} // toggle boolean
-      >
-        <Text style={styles.buttonText}>
-          {showBorder ? "Hide Border" : "Show Border"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+          if (route.name === "Counter") {
+            iconName = focused ? "add-circle" : "add-circle-outline";
+          } else if (route.name === "To-Do") {
+            iconName = focused ? "list" : "list-outline";
+          }
+
+          // Return the Ionicon
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "tomato",
+        tabBarInactiveTintColor: "gray",
+      })}>
+        <Tab.Screen name="Counter" component={CounterScreen} />
+        <Tab.Screen name="To-Do" component={ToDoScreen} />
+      </Tab.Navigator>
   );
 }
 
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#0000ff",
-  },
-  text: {
-    fontSize: 24,
-    color: "cyan",
-  },
-  button: {
-    backgroundColor: "cyan",
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    marginVertical: 5,
-  },
-  buttonText: {
-    color: "#white",
-  },
-  borderOn: {
-    borderWidth: 5,
-    borderColor: "cyan",
-    marginVertical: 10,
-    marginHorizontal: 10,
-  },
-});
+
+
